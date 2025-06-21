@@ -3,55 +3,25 @@
 	import '../app.css';
 
 	let { children } = $props();
+
+	const year = new Date().getFullYear();
 </script>
 
-<div class="app">
-	<Header />
+<Header />
 
-	<main>
-		{@render children()}
-	</main>
+<main class="flex items-start justify-center">
+	{@render children()}
+</main>
 
-	<footer>
-		<p>
-			visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to learn about SvelteKit
+<footer class="flex justify-between items-center justify-center">
+	<div class="flex items-center justify-center">
+		<p class="text-sm text-center text-white opacity-75">
+			Crafted with ❤️ by Mari Hernandez<span class="align-super text-xs">&reg;</span>. All rights reserved © {year}.
 		</p>
-	</footer>
-</div>
+		<img src="favicon.png" alt="SvelteKit" class="w-8 h-8 object-contain" />
+	</div>
+</footer>
 
 <style>
-	.app {
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
-	}
-
-	main {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		padding: 1rem;
-		width: 100%;
-		max-width: 64rem;
-		margin: 0 auto;
-		box-sizing: border-box;
-	}
-
-	footer {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		padding: 12px;
-	}
-
-	footer a {
-		font-weight: bold;
-	}
-
-	@media (min-width: 480px) {
-		footer {
-			padding: 12px 0;
-		}
-	}
+	
 </style>
