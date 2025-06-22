@@ -2,6 +2,11 @@
     
 </script>
 
+<svelte:head>
+	<title>About</title>
+	<meta name="about" content="about" />
+</svelte:head>
+
 <div class="mt-10 border border-[var(--color-theme-1)] p-4 rounded-xl max-w-md mx-auto shadow-md font-sans grid gap-5">
     <h2 class="text-2xl font-bold mb-2 text-center">🎮 About</h2>
     <p class="mb-4">
