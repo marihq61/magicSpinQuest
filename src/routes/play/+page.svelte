@@ -126,9 +126,9 @@
 
 <section
 	class="w-full h-full flex flex-col items-center justify-center lg:p-10 text-white font-mono
-  bg-[linear-gradient(to_bottom,_rgba(183,137,22,0)_0%,_rgba(183,137,22,0.5)_25%,_rgba(183,137,22,1)_50%,_rgba(183,137,22,0.5)_75%,_rgba(183,137,22,0)_100%)]"
+  	bg-[linear-gradient(to_bottom,_rgba(183,137,22,0)_0%,_rgba(183,137,22,0.5)_25%,_rgba(183,137,22,1)_50%,_rgba(183,137,22,0.5)_75%,_rgba(183,137,22,0)_100%)]"
 >
-	<div class="h-full w-[95%] lg:w-[55%] flex flex-col items-center justify-center px-2 py-10 lg:p-20 rounded-lg space-y-6">
+	<div class="h-full w-[95%] lg:w-[55%] flex flex-col items-center justify-center px-2 py-5 lg:p-20 rounded-lg space-y-6">
 		<SlotCanvas bind:this={slotRef} />
 
 		<div class="grid grid-cols-2 gap-6 w-full items-center justify-center">
@@ -141,29 +141,34 @@
 		</div>
 
 		<button
-			class="w-24 h-24 bg-green-600 hover:bg-green-500 rounded-full text-xl flex items-center justify-center shadow-lg transition active:scale-95 disabled:opacity-50"
+			class="w-15 h-15 lg:w-24 lg:h-24 bg-green-600 hover:bg-green-500 rounded-full text-xl flex items-center justify-center shadow-lg transition active:scale-95 disabled:opacity-50"
 			class:cursor-pointer={!rolling}
 			on:click={roll}
 			disabled={rolling}
 		>
 			{#if rolling}
-				<span class="animate-spin">
-					<img src="/loading.svg" alt="🎰" class="h-15 w-15">
+				<span class="flex items-center justify-center animate-spin w-full h-full">
+					<img src="/loading.svg" alt="🎰" class="h-10 w-10" />
 				</span>
 			{:else}
-				Roll <img src="/play.svg" alt="▶" class="h-5 w-5">
+				<span class="flex items-center justify-center gap-1 w-full h-full text-xs lg:text-lg">
+					Roll
+					<img src="/play.svg" alt="▶" class="h-5 w-5" />
+				</span>
 			{/if}
 		</button>
 
 		{#if canCashout}
 			<button
 				id="cashout"
-				class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-xl transition duration-300 disabled:opacity-50"
+				class="w-15 h-15 lg:w-24 lg:h-24 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-xl transition duration-300 disabled:opacity-50"
 				on:click={cashout}
 				on:mouseover={handleHoverCashout}
 				disabled={!canCashout || cashoutBlocked}
 			>
-				Cash Out
+				<span class="flex items-center justify-center w-full h-full text-xs lg:text-lg">
+					Cash Out
+				</span>
 			</button>
 		{/if}
 	</div>

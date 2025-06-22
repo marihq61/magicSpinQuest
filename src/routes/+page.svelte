@@ -17,4 +17,3 @@
 		<img src="/icons8-casino.gif" alt="" class="w-6 h-6 lg:w-8 lg:h-8">
 	</a>
 </section>
-
