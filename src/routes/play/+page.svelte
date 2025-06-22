@@ -161,7 +161,7 @@
 		{#if canCashout}
 			<button
 				id="cashout"
-				class="w-15 h-15 lg:w-24 lg:h-24 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-xl transition duration-300 disabled:opacity-50"
+				class="w-15 h-15 lg:w-auto lg:h-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-xl transition duration-300 disabled:opacity-50 cursor-pointer"
 				on:click={cashout}
 				on:mouseover={handleHoverCashout}
 				disabled={!canCashout || cashoutBlocked}
