@@ -79,8 +79,16 @@
 	}
 </script>
 
-<section class="w-full h-full flex flex-col items-center justify-center lg:p-10 text-white font-mono">
-	<div class="w-[95%] lg:w-[55%] flex flex-col items-center justify-center px-2 py-10 lg:p-20 rounded-lg bg-[#B78916] space-y-6">
+<svelte:head>
+	<title>Play</title>
+	<meta name="play" content="Let's play" />
+</svelte:head>
+
+<section
+	class="w-full h-full flex flex-col items-center justify-center lg:p-10 text-white font-mono
+  bg-[linear-gradient(to_bottom,_rgba(183,137,22,0)_0%,_rgba(183,137,22,0.5)_25%,_rgba(183,137,22,1)_50%,_rgba(183,137,22,0.5)_75%,_rgba(183,137,22,0)_100%)]"
+>
+	<div class="h-full w-[95%] lg:w-[55%] flex flex-col items-center justify-center px-2 py-10 lg:p-20 rounded-lg space-y-6">
 		<SlotCanvas bind:this={slotRef} />
 
 		<div class="grid grid-cols-2 gap-6 w-full items-center justify-center">
@@ -93,9 +101,9 @@
                 disabled={rolling}
             >
                 {#if rolling}
-                    <span class="animate-spin">🎰</span>
+                    <span class="animate-spin"><img src="/loading.svg" alt="🎰"></span>
                 {:else}
-                    Roll ▶️
+                    Roll <img src="/play.svg" alt="▶" class="h-5 w-5">
                 {/if}
             </button>
 		</div>

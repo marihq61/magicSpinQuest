@@ -1,8 +1,15 @@
 <script>
 	import { onMount } from 'svelte';
 
-	let symbols = ['🍒', '🍋', '🍊', '🍉'];
-	let result = ['❔', '❔', '❔'];
+	let symbols = [
+		'/cherries.svg', 
+		'/limon.svg', 
+		'/orange.svg', 
+		'/watermelon.svg'
+	];
+
+	let symbolImages = [];
+	let result = ['/question.svg','/question.svg','/question.svg'];
 
 	let canvas;
 	let ctx;
@@ -16,21 +23,43 @@
 	const canvasWidth = symbolWidth * reelCount;
 	const canvasHeight = symbolHeight;
 
-	// Iniciar canvas y dibujo
-	onMount(() => {
+	// Cargar imágenes SVG en memoria
+	async function loadImages() {
+		for (let src of symbols) {
+			const img = new Image();
+			img.src = src;
+			await img.decode(); // esperar que la imagen se cargue
+			symbolImages.push(img);
+		}
+	}
+
+	function getImageByPath(path) {
+		const index = symbols.indexOf(path);
+		return symbolImages[index];
+	}
+
+	onMount(async () => {
 		ctx = canvas.getContext('2d');
 		canvas.width = canvasWidth;
 		canvas.height = canvasHeight;
+		await loadImages();
 		drawInitial();
 	});
 
-	// Dibujar símbolo centrado
-	function drawSymbol(symbol, x, y) {
-		ctx.font = '60px serif';
-		ctx.textAlign = 'center';
-		ctx.textBaseline = 'middle';
+	// Dibujar imagen SVG en la posición indicada
+	function drawSymbol(symbolPath, x, y) {
 		ctx.clearRect(x, y, symbolWidth, symbolHeight);
-		ctx.fillText(symbol, x + symbolWidth / 2, y + symbolHeight / 2);
+
+		const image = getImageByPath(symbolPath);
+		if (image) {
+			ctx.drawImage(image, x, y, symbolWidth, symbolHeight);
+		} else {
+			// fallback si no encuentra la imagen (ej: ❔)
+			ctx.font = '60px serif';
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(symbolPath, x + symbolWidth / 2, y + symbolHeight / 2);
+		}
 	}
 
 	function drawInitial() {
@@ -41,16 +70,14 @@
 
 	function spin(reveal) {
 		isSpinning = true;
-		const start = performance.now();
 		reelSymbols = [[], [], []];
 
-		// Pre-generar secuencias aleatorias por reel
+		// Pre-generar símbolos aleatorios
 		for (let i = 0; i < reelCount; i++) {
 			for (let j = 0; j < 20; j++) {
 				const rand = symbols[Math.floor(Math.random() * symbols.length)];
 				reelSymbols[i].push(rand);
 			}
-			// Agregar resultado final
 			reelSymbols[i].push(reveal[i]);
 		}
 

@@ -1,11 +1,16 @@
 import { json } from '@sveltejs/kit';
 
-const symbols = ['🍒', '🍋', '🍊', '🍉'];
+const symbols = [
+	'/cherries.svg', 
+	'/limon.svg', 
+	'/orange.svg', 
+	'/watermelon.svg'
+	];
 const payouts = {
-	'🍒': 10,
-	'🍋': 20,
-	'🍊': 30,
-	'🍉': 40
+	'/cherries.svg' : 10,
+	'/limon.svg' : 20,
+	'/orange.svg' : 30,
+	'/watermelon.svg' : 40
 };
 
 function spin() {
