@@ -1,6 +1,7 @@
 <script>
 	import Swal from 'sweetalert2';
 	import SlotCanvas from '$lib/components/SlotCanvas.svelte';
+	import { showLoginModal } from '$lib/stores.js';
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
 
@@ -30,11 +31,29 @@
 		const data = await res.json();
 
 		if (data.error) {
-			Swal.fire({
-				text: `${data.error}`,
-				icon: 'error',
-				confirmButtonText: 'ok :('
-			});
+			if (data.error === 'Not enough credits') {
+				Swal.fire({
+					title: 'No more credits!',
+					text: 'Do you want to get more credits?',
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonColor: 'var(--color-theme-2)',
+					cancelButtonColor: '#d33',
+					confirmButtonText: 'Yes, log in',
+					cancelButtonText: 'Cancel',
+					reverseButtons: true
+				}).then((result) => {
+					if (result.isConfirmed) {
+						showLoginModal.set(true);
+					}
+				});
+			} else {
+				Swal.fire({
+					text: `${data.error}`,
+					icon: 'error',
+					confirmButtonText: 'ok :('
+				});
+			}
 			rolling = false;
 			return;
 		}

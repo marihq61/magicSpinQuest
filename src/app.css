@@ -59,4 +59,10 @@ footer {
 	text-align: center;
 }
 
+.btn-outline-theme {
+  	@apply border-2 border-solid border-[var(--color-theme-1)] px-4 py-2 rounded hover:bg-[var(--color-theme-1)] cursor-pointer;
+}
 
+.input {
+	@apply w-full px-3 py-2 border border-gray-300 rounded mt-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-theme-1)];
+}
