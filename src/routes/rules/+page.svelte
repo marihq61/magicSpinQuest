@@ -12,7 +12,7 @@
 	<meta name="rules" content="rules" />
 </svelte:head>
 
-<div class="mt-10 border border-[var(--color-theme-1)] p-4 rounded-xl max-w-md mx-auto shadow-md font-sans grid gap-5">
+<div class="my-10 border border-[var(--color-theme-1)] p-4 rounded-xl max-w-md mx-auto shadow-md font-sans grid gap-5">
     <h2 class="text-xl font-bold mb-4 text-center">Game Rules</h2>
     <ul class="list-disc list-inside space-y-2">
         <li>You start with <span class="font-semibold">10 credits</span>.</li>
