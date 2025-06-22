@@ -5,7 +5,9 @@
 		'/cherries.svg', 
 		'/limon.svg', 
 		'/orange.svg', 
-		'/watermelon.svg'
+		'/watermelon.svg',
+		'/clock_loading.svg',
+		'/question.svg'
 	];
 
 	let symbolImages = [];
@@ -50,21 +52,27 @@
 	function drawSymbol(symbolPath, x, y) {
 		ctx.clearRect(x, y, symbolWidth, symbolHeight);
 
+		// Dibuja borde (antes de la imagen)
+		ctx.strokeStyle = 'black'; // o cualquier color
+		ctx.lineWidth = 4;
+		ctx.strokeRect(x, y, symbolWidth, symbolHeight);
+
 		const image = getImageByPath(symbolPath);
 		if (image) {
 			ctx.drawImage(image, x, y, symbolWidth, symbolHeight);
 		} else {
-			// fallback si no encuentra la imagen (ej: ❔)
+			// fallback si no encuentra la imagen
 			ctx.font = '60px serif';
 			ctx.textAlign = 'center';
 			ctx.textBaseline = 'middle';
+			ctx.fillStyle = 'white'; // color del texto ❔
 			ctx.fillText(symbolPath, x + symbolWidth / 2, y + symbolHeight / 2);
 		}
 	}
 
 	function drawInitial() {
 		for (let i = 0; i < reelCount; i++) {
-			drawSymbol('❔', i * symbolWidth, 0);
+			drawSymbol('/question.svg', i * symbolWidth, 0);
 		}
 	}
 
@@ -100,7 +108,10 @@
 	}
 
 	export function playSpin(finalResult) {
-		if (!isSpinning) spin(finalResult);
+		if (!isSpinning) {
+			result = finalResult;
+			spin(finalResult);
+		}
 	}
 </script>
 

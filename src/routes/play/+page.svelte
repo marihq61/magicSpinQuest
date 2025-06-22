@@ -1,18 +1,16 @@
 <script>
+	import Swal from 'sweetalert2';
 	import SlotCanvas from '$lib/components/SlotCanvas.svelte';
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
 
-	let slotRef;
 	const credits = writable(0);
+	let slotRef;
 	let rolling = false;
 	let canCashout = false;
 	let rollCount = 0;
     let cashoutBlocked = false;
-
-	let jumpX = 0;
-	let jumpY = 0;
-	let cashoutDisabled = false;
+	let winAmount = 0;
 
 	onMount(async () => {
 		const res = await fetch('/api/start');
@@ -26,13 +24,17 @@
 		if (rolling) return;
 
 		rolling = true;
-		slotRef.playSpin(['⏳', '⏳', '⏳']); // mostrar carga visual
+		slotRef.playSpin(['/clock_loading.svg', '/clock_loading.svg', '/clock_loading.svg']); // mostrar carga visual
 
 		const res = await fetch('/api/roll', { method: 'POST' });
 		const data = await res.json();
 
 		if (data.error) {
-			alert(data.error);
+			Swal.fire({
+				text: `${data.error}`,
+				icon: 'error',
+				confirmButtonText: 'ok :('
+			});
 			rolling = false;
 			return;
 		}
@@ -41,12 +43,23 @@
 		if (rollCount >= 2) canCashout = true;
 
 		// Mostrar cada símbolo con delay
-		setTimeout(() => slotRef.playSpin([data.result[0], '⏳', '⏳']), 1000);
-		setTimeout(() => slotRef.playSpin([data.result[0], data.result[1], '⏳']), 2000);
+		setTimeout(() => slotRef.playSpin([data.result[0], '/clock_loading.svg', '/clock_loading.svg']), 1000);
+		setTimeout(() => slotRef.playSpin([data.result[0], data.result[1], '/clock_loading.svg']), 2000);
 		setTimeout(() => {
 			slotRef.playSpin(data.result); // Final
 			credits.set(data.credits);
+			winAmount = data.payout ?? 0;
 			rolling = false;
+
+			if (data.payout > 0) {
+				Swal.fire({
+					title: 'Winner! 🎉',
+					text: `You just won ${data.payout} credits!`,
+					icon: 'success',
+					showConfirmButton: false,
+					timer: 3000
+				});
+			}
 		}, 3000);
 	}
 
@@ -56,8 +69,16 @@
 		const res = await fetch('/api/cashout', { method: 'POST' });
 		const data = await res.json();
 		if (data.success) {
-			alert(`Cashed out ${data.creditsCashedOut} credits!`);
-			window.location.href = '/'; // o redirige a página de inicio
+			Swal.fire({
+				text: `Cashed out ${data.creditsCashedOut} credits!`,
+				icon: 'info',
+				showConfirmButton: false,
+				timer: 2000
+			}).then((result) => {
+				if (result.dismiss === Swal.DismissReason.timer) {
+					window.location.href = '/'; // o redirige a página de inicio
+  				}
+			});
 		}
 	}
 
@@ -95,18 +116,25 @@
 			<p class="bg-yellow-900 p-3 rounded-lg">
 				Credits: <span class="underline">{$credits}</span>
 			</p>
-            <button
-                class="justify-self-center w-20 h-20 rounded-lg flex items-center justify-center text-white bg-green-600 hover:bg-green-500 transition duration-300 disabled:opacity-50"
-                on:click={roll}
-                disabled={rolling}
-            >
-                {#if rolling}
-                    <span class="animate-spin"><img src="/loading.svg" alt="🎰"></span>
-                {:else}
-                    Roll <img src="/play.svg" alt="▶" class="h-5 w-5">
-                {/if}
-            </button>
+			<p class="bg-green-900 p-3 rounded-lg">
+				Win: <span class="underline">{winAmount}</span>
+			</p>
 		</div>
+
+		<button
+			class="w-24 h-24 bg-green-600 hover:bg-green-500 rounded-full text-xl flex items-center justify-center shadow-lg transition active:scale-95 disabled:opacity-50"
+			class:cursor-pointer={!rolling}
+			on:click={roll}
+			disabled={rolling}
+		>
+			{#if rolling}
+				<span class="animate-spin">
+					<img src="/loading.svg" alt="🎰" class="h-15 w-15">
+				</span>
+			{:else}
+				Roll <img src="/play.svg" alt="▶" class="h-5 w-5">
+			{/if}
+		</button>
 
 		{#if canCashout}
 			<button
