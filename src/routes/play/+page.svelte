@@ -9,8 +9,9 @@
 	let slotRef;
 	let rolling = false;
 	let canCashout = false;
+	let cashoutBlocked = false;
+	let cashoutDone = false;
 	let rollCount = 0;
-    let cashoutBlocked = false;
 	let winAmount = 0;
 
 	onMount(async () => {
@@ -83,11 +84,13 @@
 	}
 
 	async function cashout() {
-		if (!canCashout || cashoutBlocked) return;
+		if (!canCashout || cashoutBlocked || cashoutDone) return;
 
 		const res = await fetch('/api/cashout', { method: 'POST' });
 		const data = await res.json();
 		if (data.success) {
+			cashoutDone = true;
+
 			Swal.fire({
 				text: `Cashed out ${data.creditsCashedOut} credits!`,
 				icon: 'info',
@@ -95,9 +98,13 @@
 				timer: 2000
 			}).then((result) => {
 				if (result.dismiss === Swal.DismissReason.timer) {
-					window.location.href = '/'; // o redirige a página de inicio
-  				}
+					window.location.href = '/';
+				}
 			});
+
+			setTimeout(() => {
+				window.location.href = '/';
+			}, 3000);
 		}
 	}
 
@@ -105,7 +112,6 @@
 		if (!canCashout) return;
 		const rand = Math.random();
 		if (rand < 0.5) {
-			// saltar
 			const btn = document.getElementById('cashout');
 			const offsetX = Math.random() * 300 - 150;
 			const offsetY = Math.random() * 300 - 150;
@@ -161,10 +167,12 @@
 		{#if canCashout}
 			<button
 				id="cashout"
-				class="w-15 h-15 lg:w-auto lg:h-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-xl transition duration-300 disabled:opacity-50 cursor-pointer"
+				class="relative group overflow-hidden bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-xl transition-all duration-300 disabled:opacity-50 cursor-pointer 
+					hover:animate-wiggle"
 				on:click={cashout}
 				on:mouseover={handleHoverCashout}
-				disabled={!canCashout || cashoutBlocked}
+				on:focus={handleHoverCashout}
+				disabled={!canCashout || cashoutBlocked || cashoutDone}
 			>
 				<span class="flex items-center justify-center w-full h-full text-xs lg:text-lg">
 					Cash Out
@@ -173,11 +181,3 @@
 		{/if}
 	</div>
 </section>
-
-
-<style>
-	#cashout {
-		position: relative;
-		transition: transform 0.3s ease;
-	}
-</style>
