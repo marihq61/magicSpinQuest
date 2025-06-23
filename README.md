@@ -1,5 +1,10 @@
-# sv
+# Magic Spin Quest is a quirky slot machine game built by Mariana Hernández as part of a coding challenge.
 
+It’s a simple game where matching fruit means winning credits—but don’t get too confident. The odds may not always be in your favor.
+
+Developed using Svelte and TailwindCSS, this project explores game logic, UI animation, and a few sneaky surprises along the way.
+
+****************************************************************************************************************************************************************************
 Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
 
 ## Creating a project
