@@ -13,8 +13,10 @@
 	let cashoutDone = false;
 	let rollCount = 0;
 	let winAmount = 0;
+	let isMobile = false;
 
 	onMount(async () => {
+		isMobile = /Mobi|Android/i.test(navigator.userAgent);
 		const res = await fetch('/api/start');
 		const data = await res.json();
 		if (data.success) {
@@ -85,26 +87,51 @@
 
 	async function cashout() {
 		if (!canCashout || cashoutBlocked || cashoutDone) return;
+		cashoutDone = true;
 
-		const res = await fetch('/api/cashout', { method: 'POST' });
-		const data = await res.json();
-		if (data.success) {
-			cashoutDone = true;
+		try {
+			const res = await fetch('/api/cashout', { method: 'POST' });
+			const data = await res.json();
 
-			Swal.fire({
-				text: `Cashed out ${data.creditsCashedOut} credits!`,
-				icon: 'info',
-				showConfirmButton: false,
-				timer: 2000
-			}).then((result) => {
-				if (result.dismiss === Swal.DismissReason.timer) {
-					window.location.href = '/';
+			if (data.success) {
+				const btn = document.getElementById('cashout');
+				if (btn) {
+					btn.style.transform = 'none';
+					btn.classList.remove('hover:animate-wiggle');
+					btn.style.animation = 'none';
+					btn.style.transition = 'none';
+					btn.style.pointerEvents = 'none';
 				}
+				Swal.fire({
+					text: `Cashed out ${data.creditsCashedOut} credits!`,
+					icon: 'info',
+					showConfirmButton: false,
+					timer: 2000
+				});
+			} else {
+				Swal.fire({
+					text: data.error || 'Something went wrong.',
+					icon: 'warning',
+					showConfirmButton: false,
+					timer: 1500
+				});
+			}
+
+			setTimeout(() => {
+				window.location.href = '/';
+			}, 2000);
+		} catch (e) {
+			console.error(e);
+			Swal.fire({
+				text: 'Network error, redirecting...',
+				icon: 'error',
+				showConfirmButton: false,
+				timer: 1500
 			});
 
 			setTimeout(() => {
 				window.location.href = '/';
-			}, 3000);
+			}, 2000);
 		}
 	}
 
@@ -116,6 +143,34 @@
 			const offsetX = Math.random() * 300 - 150;
 			const offsetY = Math.random() * 300 - 150;
 			btn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+		} else if (rand < 0.9) {
+			cashoutBlocked = true;
+			setTimeout(() => {
+				cashoutBlocked = false;
+			}, 2000);
+		}
+	}
+
+	function handleTouchCashout() {
+		if (!canCashout || cashoutBlocked || cashoutDone || !isMobile) return;
+
+		const rand = Math.random();
+		const btn = document.getElementById('cashout');
+		if (!btn) return;
+
+		if (rand < 0.5) {
+			const offsetX = Math.random() * 200 - 100;
+			const offsetY = Math.random() * 200 - 100;
+
+			const currentTransform = btn.style.transform || 'translate(0px, 0px)';
+			const match = /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(currentTransform);
+			const prevX = match ? parseFloat(match[1]) : 0;
+			const prevY = match ? parseFloat(match[2]) : 0;
+
+			const newX = prevX + offsetX;
+			const newY = prevY + offsetY;
+
+			btn.style.transform = `translate(${newX}px, ${newY}px)`;
 		} else if (rand < 0.9) {
 			cashoutBlocked = true;
 			setTimeout(() => {
@@ -167,11 +222,11 @@
 		{#if canCashout}
 			<button
 				id="cashout"
-				class="relative group overflow-hidden bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-xl transition-all duration-300 disabled:opacity-50 cursor-pointer 
-					hover:animate-wiggle"
+				class="relative group overflow-hidden bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-xl transition-all duration-300 disabled:opacity-50 cursor-pointer"
 				on:click={cashout}
 				on:mouseover={handleHoverCashout}
 				on:focus={handleHoverCashout}
+				on:touchstart={handleTouchCashout}
 				disabled={!canCashout || cashoutBlocked || cashoutDone}
 			>
 				<span class="flex items-center justify-center w-full h-full text-xs lg:text-lg">
