@@ -7,6 +7,7 @@
 
 	const credits = writable(0);
 	let slotRef;
+	let lever = false;
 	let rolling = false;
 	let canCashout = false;
 	let cashoutBlocked = false;
@@ -28,7 +29,11 @@
 		if (rolling) return;
 
 		rolling = true;
-		slotRef.playSpin(['/clock_loading.svg', '/clock_loading.svg', '/clock_loading.svg']); // mostrar carga visual
+		lever = true;
+
+		setTimeout(() => {
+			lever = false;
+		}, 1000);
 
 		const res = await fetch('/api/roll', { method: 'POST' });
 		const data = await res.json();
@@ -64,11 +69,9 @@
 		rollCount++;
 		if (rollCount >= 2) canCashout = true;
 
-		// Mostrar cada símbolo con delay
-		setTimeout(() => slotRef.playSpin([data.result[0], '/clock_loading.svg', '/clock_loading.svg']), 1000);
-		setTimeout(() => slotRef.playSpin([data.result[0], data.result[1], '/clock_loading.svg']), 2000);
+		slotRef.playSpin(data.result);
+
 		setTimeout(() => {
-			slotRef.playSpin(data.result); // Final
 			credits.set(data.credits);
 			winAmount = data.payout ?? 0;
 			rolling = false;
@@ -185,54 +188,63 @@
 	<meta name="play" content="Let's play" />
 </svelte:head>
 
-<section
-	class="w-full h-full flex flex-col items-center justify-center lg:p-10 text-white font-mono
-  	bg-[linear-gradient(to_bottom,_rgba(183,137,22,0)_0%,_rgba(183,137,22,0.5)_25%,_rgba(183,137,22,1)_50%,_rgba(183,137,22,0.5)_75%,_rgba(183,137,22,0)_100%)]"
->
-	<div class="h-full w-[95%] lg:w-[55%] flex flex-col items-center justify-center px-2 py-5 lg:p-20 rounded-lg space-y-6">
-		<SlotCanvas bind:this={slotRef} />
-
-		<div class="grid grid-cols-2 gap-6 w-full items-center justify-center">
-			<p class="bg-yellow-900 p-3 rounded-lg">
-				Credits: <span class="underline">{$credits}</span>
-			</p>
-			<p class="bg-green-900 p-3 rounded-lg">
-				Win: <span class="underline">{winAmount}</span>
-			</p>
+<section class="w-full h-full flex flex-col items-center justify-center xl:p-10 text-white font-mono">
+	<div class="w-[95%] xl:w-[70%] flex flex-row items-stretch justify-start bg-[var(--color-theme-1)] my-2 xl:m-0 p-5 rounded-lg">
+		<div 
+			class="flex justify-center items-center"
+			class:hidden={isMobile}
+		>
+			<img src="/lever.png" alt="Lever" 
+				class="h-40 w-auto" 
+				class:flip={lever}
+			/>
 		</div>
 
-		<button
-			class="w-15 h-15 lg:w-24 lg:h-24 bg-green-600 hover:bg-green-500 rounded-full text-xl flex items-center justify-center shadow-lg transition active:scale-95 disabled:opacity-50"
-			class:cursor-pointer={!rolling}
-			on:click={roll}
-			disabled={rolling}
-		>
-			{#if rolling}
-				<span class="flex items-center justify-center animate-spin w-full h-full">
-					<img src="/loading.svg" alt="🎰" class="h-10 w-10" />
-				</span>
-			{:else}
-				<span class="flex items-center justify-center gap-1 w-full h-full text-xs lg:text-lg">
-					Roll
-					<img src="/play.svg" alt="▶" class="h-5 w-5" />
-				</span>
-			{/if}
-		</button>
+		<div class="flex flex-col bg-[#00000036] items-center justify-center px-2 py-5 xl:p-10 rounded-lg space-y-6 grow animated-glow">
+			<SlotCanvas bind:this={slotRef} />
 
-		{#if canCashout}
+			<div class="grid grid-rows-2 xl:grid-cols-2 gap-6 w-full items-center justify-center">
+				<p class="bg-yellow-900 p-3 rounded-lg">
+					Total Credits: <span class="underline">{$credits}</span>
+				</p>
+				<p class="bg-green-900 p-3 rounded-lg">
+					Credits Won: <span class="underline">{winAmount}</span>
+				</p>
+			</div>
+
 			<button
-				id="cashout"
-				class="relative group overflow-hidden bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-xl transition-all duration-300 disabled:opacity-50 cursor-pointer"
-				on:click={cashout}
-				on:mouseover={handleHoverCashout}
-				on:focus={handleHoverCashout}
-				on:touchstart={handleTouchCashout}
-				disabled={!canCashout || cashoutBlocked || cashoutDone}
+				class="w-15 h-15 xl:w-24 xl:h-24 bg-green-600 hover:bg-green-500 rounded-full text-xl flex items-center justify-center shadow-lg transition active:scale-95 disabled:opacity-50"
+				class:cursor-pointer={!rolling}
+				on:click={roll}
+				disabled={rolling}
 			>
-				<span class="flex items-center justify-center w-full h-full text-xs lg:text-lg">
-					Cash Out
-				</span>
+				{#if rolling}
+					<span class="flex items-center justify-center animate-spin w-full h-full">
+						<img src="/loading.svg" alt="🎰" class="h-10 w-10" />
+					</span>
+				{:else}
+					<span class="flex items-center justify-center gap-1 w-full h-full text-xs xl:text-lg">
+						Roll
+						<img src="/play.svg" alt="▶" class="h-5 w-5" />
+					</span>
+				{/if}
 			</button>
-		{/if}
+
+			{#if canCashout}
+				<button
+					id="cashout"
+					class="relative group overflow-hidden bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-xl transition-all duration-300 disabled:opacity-50 cursor-pointer"
+					on:click={cashout}
+					on:mouseover={handleHoverCashout}
+					on:focus={handleHoverCashout}
+					on:touchstart={handleTouchCashout}
+					disabled={!canCashout || cashoutBlocked || cashoutDone}
+				>
+					<span class="flex items-center justify-center w-full h-full text-xs xl:text-lg">
+						Cash Out
+					</span>
+				</button>
+			{/if}
+		</div>
 	</div>
 </section>

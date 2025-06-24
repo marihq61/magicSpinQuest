@@ -1,36 +1,39 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 
 	let symbols = [
-		'/cherries.svg', 
-		'/limon.svg', 
-		'/orange.svg', 
+		'/cherries.svg',
+		'/limon.svg',
+		'/orange.svg',
 		'/watermelon.svg',
-		'/clock_loading.svg',
 		'/question.svg'
 	];
 
 	let symbolImages = [];
-	let result = ['/question.svg','/question.svg','/question.svg'];
-
 	let canvas;
 	let ctx;
 	let isSpinning = false;
 	let animationId;
 	let reelCount = 3;
 	let reelSymbols = [];
+	let glowPhase = 0;
+	let glowDirection = 1;
+	let visibleSymbols =  Array(reelCount).fill('/question.svg');
+	let glowAnimationId;
 
 	const symbolHeight = 100;
 	const symbolWidth = 100;
-	const canvasWidth = symbolWidth * reelCount;
+	const reelSpacing = 20;
+	const padding = 10;
+	const canvasWidth = (symbolWidth + reelSpacing) * reelCount - reelSpacing;
 	const canvasHeight = symbolHeight;
+	const spinSymbols = symbols.filter(s => s !== '/question.svg');
 
-	// Cargar imágenes SVG en memoria
 	async function loadImages() {
 		for (let src of symbols) {
 			const img = new Image();
 			img.src = src;
-			await img.decode(); // esperar que la imagen se cargue
+			await img.decode();
 			symbolImages.push(img);
 		}
 	}
@@ -40,85 +43,119 @@
 		return symbolImages[index];
 	}
 
+	function drawSymbol(symbolPath, x, y) {
+		ctx.clearRect(x, y, symbolWidth, symbolHeight);
+
+		ctx.save();
+		ctx.shadowColor = 'white';
+		ctx.shadowBlur = 10 + 5 * Math.sin(glowPhase);
+		ctx.strokeStyle = 'white';
+		ctx.lineWidth = 3;
+		ctx.strokeRect(x, y, symbolWidth, symbolHeight);
+		ctx.restore();
+
+		const image = getImageByPath(symbolPath);
+		if (image) {
+			ctx.drawImage(
+				image,
+				x + padding,
+				y + padding,
+				symbolWidth - 2 * padding,
+				symbolHeight - 2 * padding
+			);
+		} else {
+			ctx.font = '60px serif';
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(symbolPath, x + symbolWidth / 2, y + symbolHeight / 2);
+		}
+	}
+
+	function drawInitial() {
+		drawAll(visibleSymbols);
+	}
+
+	function spin(reveal) {
+		isSpinning = true;
+
+		let currentSymbols = Array.from({ length: reelCount }, () =>
+			spinSymbols[Math.floor(Math.random() * spinSymbols.length)]
+		);
+
+		for (let i = 0; i < reelCount; i++) {
+			const delay = (i + 1) * 1000;
+
+			const spinInterval = setInterval(() => {
+				const randomSymbol = spinSymbols[Math.floor(Math.random() * spinSymbols.length)];
+				currentSymbols[i] = randomSymbol;
+				drawAll(currentSymbols);
+			}, 100);
+
+			setTimeout(() => {
+				clearInterval(spinInterval);
+				currentSymbols[i] = reveal[i];
+				drawAll(currentSymbols);
+
+				if (i === reelCount - 1) {
+					isSpinning = false;
+				}
+			}, delay);
+		}
+	}
+
+	function drawAll(symbolArray) {
+		visibleSymbols = [...symbolArray];
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		for (let i = 0; i < reelCount; i++) {
+			drawSymbol(symbolArray[i], i * (symbolWidth + reelSpacing), 0);
+		}
+	}
+
+	function animateGlow() {
+		if (!ctx) return;
+
+		glowPhase += 0.1 * glowDirection;
+
+		if (glowPhase > Math.PI) glowDirection = -1;
+		else if (glowPhase < 0) glowDirection = 1;
+
+		drawAllWithGlow(visibleSymbols, glowPhase);
+		glowAnimationId = requestAnimationFrame(animateGlow);
+	}
+
+	function drawAllWithGlow(symbolArray, glowPhase) {
+		if (!ctx) return;
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		for (let i = 0; i < reelCount; i++) {
+			const glow = Math.floor(10 + Math.sin(glowPhase) * 10);
+			ctx.shadowColor = 'white';
+			ctx.shadowBlur = glow;
+			drawSymbol(symbolArray[i], i * (symbolWidth + reelSpacing), 0);
+		}
+		ctx.shadowBlur = 0;
+	}
+
+	export function playSpin(finalResult) {
+		if (!isSpinning) {
+			spin(finalResult);
+		}
+	}
+	
 	onMount(async () => {
 		ctx = canvas.getContext('2d');
 		canvas.width = canvasWidth;
 		canvas.height = canvasHeight;
 		await loadImages();
 		drawInitial();
+		animateGlow();
 	});
 
-	// Dibujar imagen SVG en la posición indicada
-	function drawSymbol(symbolPath, x, y) {
-		ctx.clearRect(x, y, symbolWidth, symbolHeight);
-
-		// Dibuja borde (antes de la imagen)
-		ctx.strokeStyle = 'black'; // o cualquier color
-		ctx.lineWidth = 4;
-		ctx.strokeRect(x, y, symbolWidth, symbolHeight);
-
-		const image = getImageByPath(symbolPath);
-		if (image) {
-			ctx.drawImage(image, x, y, symbolWidth, symbolHeight);
-		} else {
-			// fallback si no encuentra la imagen
-			ctx.font = '60px serif';
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-			ctx.fillStyle = 'white'; // color del texto ❔
-			ctx.fillText(symbolPath, x + symbolWidth / 2, y + symbolHeight / 2);
+	onDestroy(() => {
+		if (glowAnimationId) {
+			cancelAnimationFrame(glowAnimationId);
 		}
-	}
-
-	function drawInitial() {
-		for (let i = 0; i < reelCount; i++) {
-			drawSymbol('/question.svg', i * symbolWidth, 0);
-		}
-	}
-
-	function spin(reveal) {
-		isSpinning = true;
-		reelSymbols = [[], [], []];
-
-		// Pre-generar símbolos aleatorios
-		for (let i = 0; i < reelCount; i++) {
-			for (let j = 0; j < 20; j++) {
-				const rand = symbols[Math.floor(Math.random() * symbols.length)];
-				reelSymbols[i].push(rand);
-			}
-			reelSymbols[i].push(reveal[i]);
-		}
-
-		let frame = 0;
-		function animate() {
-			ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-			for (let i = 0; i < reelCount; i++) {
-				const current = reelSymbols[i][Math.min(frame, reelSymbols[i].length - 1)];
-				drawSymbol(current, i * symbolWidth, 0);
-			}
-			frame++;
-			if (frame < reelSymbols[0].length) {
-				animationId = requestAnimationFrame(animate);
-			} else {
-				isSpinning = false;
-			}
-		}
-
-		animate();
-	}
-
-	export function playSpin(finalResult) {
-		if (!isSpinning) {
-			result = finalResult;
-			spin(finalResult);
-		}
-	}
+	});
 </script>
 
-<canvas bind:this={canvas} class="rounded-xl shadow-lg border border-white" />
-
-<style>
-	canvas {
-		background: rgba(0, 0, 0, 0.3);
-	}
-</style>
+<canvas bind:this={canvas} class="shadow-lg w-full max-w-[400px] mx-auto"></canvas>

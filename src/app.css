@@ -78,3 +78,28 @@ footer {
 .hover\\:animate-wiggle:hover {
 	animation: wiggle 0.6s ease-in-out;
 }
+
+.flip {
+	transform: perspective(600px) rotateX(180deg);
+}
+
+@keyframes glowPulse {
+	0% {
+		box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.5);
+		border-color: rgba(255, 255, 255, 0.5);
+	}
+	50% {
+		box-shadow: 0 0 10px 4px rgba(255, 255, 255, 1);
+		border-color: rgba(255, 255, 255, 1);
+	}
+	100% {
+		box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.5);
+		border-color: rgba(255, 255, 255, 0.5);
+	}
+}
+
+.animated-glow {
+	border: 2px solid white;
+	border-radius: 0.75rem; /* same as rounded-lg */
+	animation: glowPulse 3s infinite ease-in-out;
+}

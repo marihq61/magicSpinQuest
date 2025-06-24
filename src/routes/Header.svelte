@@ -48,23 +48,23 @@
 	}
 </script>
 
-<header class="relative flex flex-col lg:flex-row lg:items-center lg:justify-between lg:px-3">
-	<div class="flex items-center justify-center md:justify-start">
+<header class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between xl:px-3">
+	<div class="flex items-center justify-center xl:justify-start">
 		<a href="/">
 			<img src="favicon.png" alt="SvelteKit" class="w-8 h-8 object-contain" />
 		</a>
 	</div>
-	<nav class="w-full my-3 lg:my-0 flex items-center justify-center px-2 lg:px-4 gap-0">
+	<nav class="w-full my-3 xl:my-0 flex items-center justify-center px-2 xl:px-4 gap-0">
 		<svg viewBox="0 0 2 3" aria-hidden="true" class="w-8 h-12 block">
 			<path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" fill="rgba(255,255,255,0.7)" />
 		</svg>
-		<ul class="relative flex items-center h-12 list-none m-0 p-0 bg-white/70 px-2 lg:px-4 space-x-2 lg:space-x-4">
+		<ul class="relative flex items-center h-12 list-none m-0 p-0 bg-white/70 px-2 xl:px-4 space-x-2 xl:space-x-4">
 			{#each navLinks as { path, label }}
 				<li class="relative h-full">
 					<a
 						href={path}
 						aria-current={page.url.pathname === path ? 'page' : undefined}
-						class="flex items-center h-full lg:px-2 text-xs lg:text-sm font-bold uppercase tracking-wider text-[var(--color-text)] hover:text-[var(--color-theme-1)] transition-colors"
+						class="flex items-center h-full xl:px-2 text-xs xl:text-sm font-bold uppercase tracking-wider text-[var(--color-text)] hover:text-[var(--color-theme-1)] transition-colors"
 						class:text-[var(--color-theme-1)]={page.url.pathname === path}
 					>
 						{label}
@@ -72,7 +72,7 @@
 
 					{#if page.url.pathname === path}
 						<!-- Arrow -->
-						<div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-0 h-0 border-[5px] lg:border-[6px] border-transparent border-t-[var(--color-theme-1)]"></div>
+						<div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-0 h-0 border-[5px] xl:border-[6px] border-transparent border-t-[var(--color-theme-1)]"></div>
 					{/if}
 				</li>
 			{/each}
@@ -81,7 +81,7 @@
 			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" fill="rgba(255,255,255,0.7)" />
 		</svg>
 	</nav>
-	<div class="flex justify-center md:justify-end">
+	<div class="flex justify-center xl:justify-end">
 		<button on:click={openLogin} class="btn-outline-theme">
 			Login
 		</button>
